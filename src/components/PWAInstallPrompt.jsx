@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Add this import
 
 const PWAInstallPage = () => {
-  const [showPrompt, setShowPrompt] = useState(true); // Changed to true by default
+  const [showPrompt, setShowPrompt] = useState(true);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const navigate = useNavigate(); // Add this hook
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
@@ -25,9 +27,14 @@ const PWAInstallPage = () => {
     
     setDeferredPrompt(null);
     setShowPrompt(false);
+    navigate('/onboarding'); // Add navigation after installation
   };
 
-  // Always render the component content
+  const handleMaybeLater = () => {
+    setShowPrompt(false);
+    navigate('/onboarding'); // Add navigation for "Maybe Later"
+  };
+
   return (
     <div className="min-h-screen bg-[#0a192f] flex items-center justify-center p-4">
       <div className="bg-[#0a192f] rounded-2xl p-6 max-w-sm w-full border border-[#64ffda] shadow-xl">
@@ -56,7 +63,7 @@ const PWAInstallPage = () => {
               Install App
             </button>
             <button
-              onClick={() => setShowPrompt(false)}
+              onClick={handleMaybeLater} // Changed to new handler
               className="w-full py-3 px-4 bg-transparent text-[#64ffda] border border-[#64ffda] rounded-lg font-medium hover:bg-[#64ffda] hover:bg-opacity-10 transition-colors"
             >
               Maybe Later
