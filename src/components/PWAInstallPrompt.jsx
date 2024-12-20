@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from 'react';
 
-const PWAInstallPrompt = () => {
-  const [showPrompt, setShowPrompt] = useState(false);
+const PWAInstallPage = () => {
+  const [showPrompt, setShowPrompt] = useState(true); // Changed to true by default
   const [deferredPrompt, setDeferredPrompt] = useState(null);
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
-      // Prevent Chrome 67 and earlier from automatically showing the prompt
       e.preventDefault();
-      // Stash the event so it can be triggered later
       setDeferredPrompt(e);
-      // Show the prompt modal
-      setShowPrompt(true);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -24,22 +20,16 @@ const PWAInstallPrompt = () => {
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
 
-    // Show the install prompt
     deferredPrompt.prompt();
-
-    // Wait for the user to respond to the prompt
     const { outcome } = await deferredPrompt.userChoice;
     
-    // Clear the deferredPrompt variable
     setDeferredPrompt(null);
-    // Hide the prompt
     setShowPrompt(false);
   };
 
-  if (!showPrompt) return null;
-
+  // Always render the component content
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="min-h-screen bg-[#0a192f] flex items-center justify-center p-4">
       <div className="bg-[#0a192f] rounded-2xl p-6 max-w-sm w-full border border-[#64ffda] shadow-xl">
         <div className="flex flex-col items-center text-center space-y-4">
           <div className="w-16 h-16 bg-[#1d3557] rounded-full flex items-center justify-center">
@@ -61,6 +51,7 @@ const PWAInstallPrompt = () => {
             <button
               onClick={handleInstallClick}
               className="w-full py-3 px-4 bg-[#64ffda] text-[#0a192f] rounded-lg font-medium hover:bg-[#4cd5b5] transition-colors"
+              disabled={!deferredPrompt}
             >
               Install App
             </button>
@@ -77,4 +68,4 @@ const PWAInstallPrompt = () => {
   );
 };
 
-export default PWAInstallPrompt;
+export default PWAInstallPage;

@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./ui/ripple.css";
 import { useParams, useNavigate } from "react-router-dom";
+
 import PWAInstallPrompt from"./PWAInstallPrompt.jsx";
 import ElevenLabsConversationyt from "./ElevenLabsConversationyt.jsx";
 import axios from 'axios';
@@ -84,6 +85,7 @@ const SleepPlayer = () => {
 
   const Name = "sleep"
   // Group all useState declarations together
+  const [showPWAPrompt, setShowPWAPrompt] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [audioSrc, setAudioSrc] = useState("");
@@ -160,6 +162,8 @@ const [duration, setDuration] = useState(0);
   }, []);
 
   
+
+
   
 
 
@@ -879,7 +883,7 @@ const [duration, setDuration] = useState(0);
   return (
     
     <div className="flex items-center justify-center h-screen bg-[#060f1c] p-4">
-      <PWAInstallPrompt/>
+     
       {isLoading ? (
         <LoadingSkeleton />
       ) : (

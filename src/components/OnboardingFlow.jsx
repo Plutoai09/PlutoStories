@@ -70,6 +70,8 @@ const OnboardingFlow = () => {
   ];
 
   const handleCategorySelect = (category) => {
+    console.log("category HERE")
+    localStorage.setItem('firstLoad', 'true');
     setSelectedCategory(category);
     if (category.path) {
       navigate(category.path);
