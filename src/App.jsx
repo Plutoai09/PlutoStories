@@ -35,7 +35,7 @@ function App() {
         <Route path="/aboutus" element={<Aboutus />} />
         <Route path="/terms" element={<TnC />} />
         <Route path="/privacy" element={<Privacy />} />
-        <Route path="/home" element={<Homepage />} />
+      
         <Route path="/contact" element={<Contact />} />
         <Route path="/refund" element={<Refund />} />
         <Route path="/youtube" element={<YTPlayer />} />
