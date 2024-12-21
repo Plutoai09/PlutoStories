@@ -5,7 +5,7 @@ const PWAInstallPage = () => {
   const [showPrompt, setShowPrompt] = useState(true);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isInstallReady, setIsInstallReady] = useState(false);
-  const [showLaunchModal, setShowLaunchModal] = useState(false);
+  const [showLaunchNudge, setShowLaunchNudge] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -38,7 +38,12 @@ const PWAInstallPage = () => {
       setDeferredPrompt(null);
       setIsInstallReady(false);
       window.deferredPrompt = null;  // Clear the global prompt
-      setShowLaunchModal(true);  // Show the launch modal instead of navigating immediately
+      setShowLaunchNudge(true); // Show the launch nudge instead of immediate navigation
+      
+      // After 5 seconds, navigate away
+      setTimeout(() => {
+        navigate('/onboarding');
+      }, 5000);
     });
 
     return () => {
@@ -67,13 +72,19 @@ const PWAInstallPage = () => {
         const { outcome } = await promptEvent.userChoice;
         console.log('Install prompt outcome:', outcome);
         
+        if (outcome === 'accepted') {
+          setShowLaunchNudge(true);
+          // Don't navigate immediately - let the appinstalled event handle it
+        } else {
+          navigate('/onboarding');
+        }
+        
         // Clear the prompt
         setDeferredPrompt(null);
         window.deferredPrompt = null;
         setIsInstallReady(false);
         setShowPrompt(false);
       }
-      // Don't navigate immediately - wait for appinstalled event
     } catch (error) {
       console.error('Installation error:', error);
       navigate('/onboarding');
@@ -85,28 +96,21 @@ const PWAInstallPage = () => {
     navigate('/onboarding');
   };
 
-  const handleLaunchApp = () => {
-    // Get the PWA's URL
-    const pwaUrl = window.location.origin;
-    
-    // Open the PWA in standalone mode
-    window.open(pwaUrl, '_blank');
-    
-    // Navigate to onboarding in the current window
-    navigate('/onboarding');
-  };
-
-  const handleContinueInBrowser = () => {
-    setShowLaunchModal(false);
-    navigate('/onboarding');
-  };
-
   // Check if it's iOS
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
   return (
-    <>
-      <div className="min-h-screen bg-[#0a192f] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0a192f] flex items-center justify-center p-4">
+      {showLaunchNudge ? (
+        <div className="fixed top-0 left-0 right-0 bg-[#64ffda] text-[#0a192f] p-4 text-center animate-fade-in">
+          <p className="font-medium">
+            Installation complete! 🎉 Launch Pluto Sleep from your home screen for the best experience.
+          </p>
+          <p className="text-sm mt-1">
+            Redirecting you in a few seconds...
+          </p>
+        </div>
+      ) : (
         <div className="bg-[#0a192f] rounded-2xl p-6 max-w-sm w-full border border-[#64ffda] shadow-xl">
           <div className="flex flex-col items-center text-center space-y-4">
             <div className="w-16 h-16 bg-[#1d3557] rounded-full flex items-center justify-center">
@@ -145,36 +149,8 @@ const PWAInstallPage = () => {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Simple Modal */}
-      {showLaunchModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-[#0a192f] rounded-2xl p-6 max-w-sm w-full border border-[#64ffda] shadow-xl">
-            <h3 className="text-xl font-semibold text-white mb-2">
-              Installation Complete!
-            </h3>
-            <p className="text-sm text-gray-300 mb-6">
-              Would you like to launch Pluto Sleep in app mode now?
-            </p>
-            <div className="flex flex-col gap-3">
-              <button
-                onClick={handleLaunchApp}
-                className="w-full py-3 px-4 bg-[#64ffda] text-[#0a192f] rounded-lg font-medium hover:bg-[#4cd5b5] transition-colors"
-              >
-                Launch App
-              </button>
-              <button
-                onClick={handleContinueInBrowser}
-                className="w-full py-3 px-4 bg-transparent text-[#64ffda] border border-[#64ffda] rounded-lg font-medium hover:bg-[#64ffda] hover:bg-opacity-10 transition-colors"
-              >
-                Continue in Browser
-              </button>
-            </div>
-          </div>
-        </div>
       )}
-    </>
+    </div>
   );
 };
 
