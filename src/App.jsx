@@ -18,6 +18,7 @@ import SleepPlayer from "./components/SleepPlayer";
 import LoginSleep from "./components/LoginSleep";
 import OnboardingFlow from "./components/OnboardingFlow";
 import PWAInstallPrompt from "./components/PWAInstallPrompt";
+import AppLaunch from "./components/AppLaunch";
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
         <Route path="/join" element={<LoginSleep />} />
         <Route path="/onboarding" element={<OnboardingFlow/>} />
         <Route path="/install" element={<PWAInstallPrompt/>} />
+        <Route path="/app" element={<AppLaunch/>} />
       </Routes>
     </Router>
   );

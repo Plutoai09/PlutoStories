@@ -5,7 +5,6 @@ const PWAInstallPage = () => {
   const [showPrompt, setShowPrompt] = useState(true);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isInstallReady, setIsInstallReady] = useState(false);
-  const [showLaunchNudge, setShowLaunchNudge] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,7 +14,7 @@ const PWAInstallPage = () => {
       || document.referrer.includes('android-app://');
 
     if (isInstalled) {
-      navigate('/onboarding');
+      navigate('/app');
       return;
     }
 
@@ -38,12 +37,7 @@ const PWAInstallPage = () => {
       setDeferredPrompt(null);
       setIsInstallReady(false);
       window.deferredPrompt = null;  // Clear the global prompt
-      setShowLaunchNudge(true); // Show the launch nudge instead of immediate navigation
-      
-      // After 5 seconds, navigate away
-      setTimeout(() => {
-        navigate('/onboarding');
-      }, 5000);
+      navigate('/app');
     });
 
     return () => {
@@ -60,7 +54,7 @@ const PWAInstallPage = () => {
       }
       
       setTimeout(() => {
-        navigate('/onboarding');
+        navigate('/app');
       }, 2000);
       return;
     }
@@ -72,22 +66,18 @@ const PWAInstallPage = () => {
         const { outcome } = await promptEvent.userChoice;
         console.log('Install prompt outcome:', outcome);
         
-        if (outcome === 'accepted') {
-          setShowLaunchNudge(true);
-          // Don't navigate immediately - let the appinstalled event handle it
-        } else {
-          navigate('/onboarding');
-        }
-        
         // Clear the prompt
         setDeferredPrompt(null);
         window.deferredPrompt = null;
         setIsInstallReady(false);
         setShowPrompt(false);
       }
+      
+      // Navigate to app launch page after installation
+      navigate('/app');
     } catch (error) {
       console.error('Installation error:', error);
-      navigate('/onboarding');
+      navigate('/app');
     }
   };
 
@@ -101,55 +91,44 @@ const PWAInstallPage = () => {
 
   return (
     <div className="min-h-screen bg-[#0a192f] flex items-center justify-center p-4">
-      {showLaunchNudge ? (
-        <div className="fixed top-0 left-0 right-0 bg-[#64ffda] text-[#0a192f] p-4 text-center animate-fade-in">
-          <p className="font-medium">
-            Installation complete! 🎉 Launch Pluto Sleep from your home screen for the best experience.
-          </p>
-          <p className="text-sm mt-1">
-            Redirecting you in a few seconds...
-          </p>
-        </div>
-      ) : (
-        <div className="bg-[#0a192f] rounded-2xl p-6 max-w-sm w-full border border-[#64ffda] shadow-xl">
-          <div className="flex flex-col items-center text-center space-y-4">
-            <div className="w-16 h-16 bg-[#1d3557] rounded-full flex items-center justify-center">
-              <img 
-                src="/images/star.webp" 
-                alt="App Icon" 
-                className="w-12 h-12 rounded-full object-cover"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <h3 className="text-xl font-semibold text-white">Install Pluto Sleep</h3>
-              <p className="text-sm text-gray-300">
-                Install our app for a better experience with quick access and offline features
+      <div className="bg-[#0a192f] rounded-2xl p-6 max-w-sm w-full border border-[#64ffda] shadow-xl">
+        <div className="flex flex-col items-center text-center space-y-4">
+          <div className="w-16 h-16 bg-[#1d3557] rounded-full flex items-center justify-center">
+            <img 
+              src="/images/star.webp" 
+              alt="App Icon" 
+              className="w-12 h-12 rounded-full object-cover"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <h3 className="text-xl font-semibold text-white">Install Pluto Sleep</h3>
+            <p className="text-sm text-gray-300">
+              Install our app for a better experience with quick access and offline features
+            </p>
+            {isIOS && (
+              <p className="text-xs text-gray-400 mt-2">
+                Tap the share button and select "Add to Home Screen"
               </p>
-              {isIOS && (
-                <p className="text-xs text-gray-400 mt-2">
-                  Tap the share button and select "Add to Home Screen"
-                </p>
-              )}
-            </div>
+            )}
+          </div>
 
-            <div className="flex flex-col w-full gap-3">
-              <button
-                onClick={handleInstallClick}
-                className="w-full py-3 px-4 bg-[#64ffda] text-[#0a192f] rounded-lg font-medium hover:bg-[#4cd5b5] transition-colors"
-              >
-                Install App
-              </button>
-              <button
-                onClick={handleMaybeLater}
-                className="w-full py-3 px-4 bg-transparent text-[#64ffda] border border-[#64ffda] rounded-lg font-medium hover:bg-[#64ffda] hover:bg-opacity-10 transition-colors"
-              >
-                Maybe Later
-              </button>
-            </div>
+          <div className="flex flex-col w-full gap-3">
+            <button
+              onClick={handleInstallClick}
+              className="w-full py-3 px-4 bg-[#64ffda] text-[#0a192f] rounded-lg font-medium hover:bg-[#4cd5b5] transition-colors"
+            >
+              Install App
+            </button>
+            <button
+              onClick={handleMaybeLater}
+              className="w-full py-3 px-4 bg-transparent text-[#64ffda] border border-[#64ffda] rounded-lg font-medium hover:bg-[#64ffda] hover:bg-opacity-10 transition-colors"
+            >
+              Maybe Later
+            </button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
