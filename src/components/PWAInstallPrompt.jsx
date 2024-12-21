@@ -79,7 +79,7 @@ const PWAInstallPage = () => {
       setShowPrompt(false);
       
       // Navigate after handling the prompt
-      navigate('/onboarding');
+      navigate('/app');
     } catch (error) {
       console.error('Installation error:', error);
       navigate('/onboarding');
