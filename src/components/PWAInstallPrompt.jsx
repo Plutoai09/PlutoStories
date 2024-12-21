@@ -4,25 +4,39 @@ import { useNavigate } from 'react-router-dom';
 const PWAInstallPage = () => {
   const [showPrompt, setShowPrompt] = useState(true);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [isInstallReady, setIsInstallReady] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const handleBeforeInstallPrompt = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-
-    // Handle standalone mode detection
+    // Check if already installed
     const isInstalled = window.matchMedia('(display-mode: standalone)').matches
       || window.navigator.standalone 
       || document.referrer.includes('android-app://');
 
-   
+    if (isInstalled) {
+      navigate('/onboarding');
+      return;
+    }
+
+    // Check for existing prompt first
+    if (window.deferredPrompt) {
+      setDeferredPrompt(window.deferredPrompt);
+      setIsInstallReady(true);
+    }
+
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setIsInstallReady(true);
+      window.deferredPrompt = e;  // Store it globally as well
+    };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     
-    // Listen for successful installation
     window.addEventListener('appinstalled', () => {
+      setDeferredPrompt(null);
+      setIsInstallReady(false);
+      window.deferredPrompt = null;  // Clear the global prompt
       navigate('/onboarding');
     });
 
@@ -32,16 +46,13 @@ const PWAInstallPage = () => {
   }, [navigate]);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) {
-      // If no deferred prompt but on mobile, might be iOS
+    if (!isInstallReady && !deferredPrompt) {
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
       
       if (isIOS) {
-        // Show iOS-specific instructions if needed
         alert('To install: tap the share button below and select "Add to Home Screen"');
       }
       
-      // Navigate anyway after a short delay
       setTimeout(() => {
         navigate('/onboarding');
       }, 2000);
@@ -49,20 +60,28 @@ const PWAInstallPage = () => {
     }
 
     try {
-      await deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
+      const promptEvent = deferredPrompt || window.deferredPrompt;
+      if (promptEvent) {
+        await promptEvent.prompt();
+        const { outcome } = await promptEvent.userChoice;
+        console.log('Install prompt outcome:', outcome);
+        
+        // Clear the prompt
+        setDeferredPrompt(null);
+        window.deferredPrompt = null;
+        setIsInstallReady(false);
+        setShowPrompt(false);
+      }
       
-      setDeferredPrompt(null);
-      setShowPrompt(false);
-      
-      // Navigate regardless of the outcome
+      // Always navigate after handling the prompt
       navigate('/onboarding');
     } catch (error) {
       console.error('Installation error:', error);
-      // Navigate anyway if there's an error
       navigate('/onboarding');
     }
   };
+
+
 
   const handleMaybeLater = () => {
     setShowPrompt(false);
