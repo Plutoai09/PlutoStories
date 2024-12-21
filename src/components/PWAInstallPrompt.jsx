@@ -17,9 +17,7 @@ const PWAInstallPage = () => {
       || window.navigator.standalone 
       || document.referrer.includes('android-app://');
 
-    if (isInstalled) {
-      navigate('/onboarding');
-    }
+   
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     
