@@ -12,6 +12,7 @@ import {
   MessageCircle,
   Phone,
   X,
+  Home,
   Loader,
   Key,
   SkipBack,
@@ -784,6 +785,13 @@ const [duration, setDuration] = useState(0);
         <LoadingSkeleton />
       ) : (
         <div className="w-full h-full max-h-[900px] sm:max-w-[375px] bg-white rounded-[40px] shadow-xl overflow-hidden flex flex-col mb-6 relative">
+       <button 
+            onClick={() => navigate('/onboarding')}
+            className="absolute top-4 left-4 z-20 w-8 h-8 bg-[#1d3557] rounded-full flex items-center justify-center text-white hover:bg-[#2a4a7f] transition-colors duration-200"
+          >
+            <Home size={16} className="text-[#64ffda]" />
+          </button>
+       
           {/* Author Image - Positioned above book image */}
           <div
             className={`absolute top-4 left-1/2 transform -translate-x-1/2 ${

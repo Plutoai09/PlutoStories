@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./ui/ripple.css";
 import { useParams, useNavigate } from "react-router-dom";
+import { Home } from "lucide-react"; // Add Home icon import
+
 
 import PWAInstallPrompt from"./PWAInstallPrompt.jsx";
 import ElevenLabsConversationyt from "./ElevenLabsConversationyt.jsx";
@@ -889,6 +891,15 @@ const [duration, setDuration] = useState(0);
       ) : (
         <div className="w-full h-[100dvh] sm:h-[900px] sm:max-h-[90vh] sm:max-w-[375px] bg-[#0a192f] rounded-[40px] shadow-xl overflow-hidden flex flex-col relative">
           {/* Author Image - Positioned above book image */}
+
+          <button 
+            onClick={() => navigate('/onboarding')}
+            className="absolute top-4 left-4 z-20 w-8 h-8 bg-[#1d3557] rounded-full flex items-center justify-center text-white hover:bg-[#2a4a7f] transition-colors duration-200"
+          >
+            <Home size={16} className="text-[#64ffda]" />
+          </button>
+
+
           <div
             className={`absolute top-4 left-1/2 transform -translate-x-1/2 ${
               !isModalOpen ? "z-10" : ""
