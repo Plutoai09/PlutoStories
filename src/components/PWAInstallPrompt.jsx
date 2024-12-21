@@ -25,7 +25,10 @@ const PWAInstallPage = () => {
     }
 
     const handleBeforeInstallPrompt = (e) => {
+      // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
+      // Stash the event so it can be triggered later
+      window.deferredPrompt = e;
       setDeferredPrompt(e);
       setIsInstallReady(true);
     };
@@ -33,9 +36,10 @@ const PWAInstallPage = () => {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     
     window.addEventListener('appinstalled', () => {
+      // Clear the prompt
+      window.deferredPrompt = null;
       setDeferredPrompt(null);
       setIsInstallReady(false);
-      window.deferredPrompt = null;
       navigate('/onboarding');
     });
 
@@ -45,7 +49,10 @@ const PWAInstallPage = () => {
   }, [navigate]);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) {
+    // Get the deferred prompt from either state or window
+    const promptEvent = deferredPrompt || window.deferredPrompt;
+
+    if (!promptEvent) {
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
       
       if (isIOS) {
@@ -59,11 +66,14 @@ const PWAInstallPage = () => {
     }
 
     try {
-      await deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
+      // Show the install prompt
+      await promptEvent.prompt();
+      // Wait for the user to respond to the prompt
+      const { outcome } = await promptEvent.userChoice;
       console.log('Install prompt outcome:', outcome);
       
       // Clear the prompt
+      window.deferredPrompt = null;
       setDeferredPrompt(null);
       setIsInstallReady(false);
       setShowPrompt(false);
