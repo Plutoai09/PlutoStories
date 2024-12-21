@@ -14,7 +14,7 @@ const PWAInstallPage = () => {
       || document.referrer.includes('android-app://');
 
     if (isInstalled) {
-      navigate('/app');
+      navigate('/onboarding');
       return;
     }
 
@@ -37,7 +37,7 @@ const PWAInstallPage = () => {
       setDeferredPrompt(null);
       setIsInstallReady(false);
       window.deferredPrompt = null;  // Clear the global prompt
-      navigate('/app');
+      navigate('/onboarding');
     });
 
     return () => {
@@ -54,7 +54,7 @@ const PWAInstallPage = () => {
       }
       
       setTimeout(() => {
-        navigate('/app');
+        navigate('/onboarding');
       }, 2000);
       return;
     }
@@ -73,13 +73,14 @@ const PWAInstallPage = () => {
         setShowPrompt(false);
       }
       
-      // Navigate to app launch page after installation
-      navigate('/app');
+      // Always navigate after handling the prompt
+      navigate('/onboarding');
     } catch (error) {
       console.error('Installation error:', error);
-      navigate('/app');
+      navigate('/onboarding');
     }
   };
+
 
   const handleMaybeLater = () => {
     setShowPrompt(false);
