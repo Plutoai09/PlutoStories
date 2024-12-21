@@ -5,6 +5,7 @@ const PWAInstallPage = () => {
   const [showPrompt, setShowPrompt] = useState(true);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isInstallReady, setIsInstallReady] = useState(false);
+  const [showLaunchModal, setShowLaunchModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,7 +38,7 @@ const PWAInstallPage = () => {
       setDeferredPrompt(null);
       setIsInstallReady(false);
       window.deferredPrompt = null;  // Clear the global prompt
-      navigate('/onboarding');
+      setShowLaunchModal(true);  // Show the launch modal instead of navigating immediately
     });
 
     return () => {
@@ -72,18 +73,31 @@ const PWAInstallPage = () => {
         setIsInstallReady(false);
         setShowPrompt(false);
       }
-      
-      // Always navigate after handling the prompt
-      navigate('/onboarding');
+      // Don't navigate immediately - wait for appinstalled event
     } catch (error) {
       console.error('Installation error:', error);
       navigate('/onboarding');
     }
   };
 
-
   const handleMaybeLater = () => {
     setShowPrompt(false);
+    navigate('/onboarding');
+  };
+
+  const handleLaunchApp = () => {
+    // Get the PWA's URL
+    const pwaUrl = window.location.origin;
+    
+    // Open the PWA in standalone mode
+    window.open(pwaUrl, '_blank');
+    
+    // Navigate to onboarding in the current window
+    navigate('/onboarding');
+  };
+
+  const handleContinueInBrowser = () => {
+    setShowLaunchModal(false);
     navigate('/onboarding');
   };
 
@@ -91,46 +105,76 @@ const PWAInstallPage = () => {
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
   return (
-    <div className="min-h-screen bg-[#0a192f] flex items-center justify-center p-4">
-      <div className="bg-[#0a192f] rounded-2xl p-6 max-w-sm w-full border border-[#64ffda] shadow-xl">
-        <div className="flex flex-col items-center text-center space-y-4">
-          <div className="w-16 h-16 bg-[#1d3557] rounded-full flex items-center justify-center">
-            <img 
-              src="/images/star.webp" 
-              alt="App Icon" 
-              className="w-12 h-12 rounded-full object-cover"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <h3 className="text-xl font-semibold text-white">Install Pluto Sleep</h3>
-            <p className="text-sm text-gray-300">
-              Install our app for a better experience with quick access and offline features
-            </p>
-            {isIOS && (
-              <p className="text-xs text-gray-400 mt-2">
-                Tap the share button and select "Add to Home Screen"
+    <>
+      <div className="min-h-screen bg-[#0a192f] flex items-center justify-center p-4">
+        <div className="bg-[#0a192f] rounded-2xl p-6 max-w-sm w-full border border-[#64ffda] shadow-xl">
+          <div className="flex flex-col items-center text-center space-y-4">
+            <div className="w-16 h-16 bg-[#1d3557] rounded-full flex items-center justify-center">
+              <img 
+                src="/images/star.webp" 
+                alt="App Icon" 
+                className="w-12 h-12 rounded-full object-cover"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-xl font-semibold text-white">Install Pluto Sleep</h3>
+              <p className="text-sm text-gray-300">
+                Install our app for a better experience with quick access and offline features
               </p>
-            )}
-          </div>
+              {isIOS && (
+                <p className="text-xs text-gray-400 mt-2">
+                  Tap the share button and select "Add to Home Screen"
+                </p>
+              )}
+            </div>
 
-          <div className="flex flex-col w-full gap-3">
-            <button
-              onClick={handleInstallClick}
-              className="w-full py-3 px-4 bg-[#64ffda] text-[#0a192f] rounded-lg font-medium hover:bg-[#4cd5b5] transition-colors"
-            >
-              Install App
-            </button>
-            <button
-              onClick={handleMaybeLater}
-              className="w-full py-3 px-4 bg-transparent text-[#64ffda] border border-[#64ffda] rounded-lg font-medium hover:bg-[#64ffda] hover:bg-opacity-10 transition-colors"
-            >
-              Maybe Later
-            </button>
+            <div className="flex flex-col w-full gap-3">
+              <button
+                onClick={handleInstallClick}
+                className="w-full py-3 px-4 bg-[#64ffda] text-[#0a192f] rounded-lg font-medium hover:bg-[#4cd5b5] transition-colors"
+              >
+                Install App
+              </button>
+              <button
+                onClick={handleMaybeLater}
+                className="w-full py-3 px-4 bg-transparent text-[#64ffda] border border-[#64ffda] rounded-lg font-medium hover:bg-[#64ffda] hover:bg-opacity-10 transition-colors"
+              >
+                Maybe Later
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Simple Modal */}
+      {showLaunchModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-[#0a192f] rounded-2xl p-6 max-w-sm w-full border border-[#64ffda] shadow-xl">
+            <h3 className="text-xl font-semibold text-white mb-2">
+              Installation Complete!
+            </h3>
+            <p className="text-sm text-gray-300 mb-6">
+              Would you like to launch Pluto Sleep in app mode now?
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleLaunchApp}
+                className="w-full py-3 px-4 bg-[#64ffda] text-[#0a192f] rounded-lg font-medium hover:bg-[#4cd5b5] transition-colors"
+              >
+                Launch App
+              </button>
+              <button
+                onClick={handleContinueInBrowser}
+                className="w-full py-3 px-4 bg-transparent text-[#64ffda] border border-[#64ffda] rounded-lg font-medium hover:bg-[#64ffda] hover:bg-opacity-10 transition-colors"
+              >
+                Continue in Browser
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
