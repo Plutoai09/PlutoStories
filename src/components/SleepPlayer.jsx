@@ -882,12 +882,12 @@ const [duration, setDuration] = useState(0);
 
   return (
     
-    <div className="flex items-center justify-center h-screen bg-[#060f1c] p-4">
+    <div className="fixed inset-0 flex items-center justify-center bg-[#060f1c] min-h-[100dvh]">
      
       {isLoading ? (
         <LoadingSkeleton />
       ) : (
-        <div className="w-full h-full max-h-[900px] sm:max-w-[375px] bg-[#0a192f] rounded-[40px] shadow-xl overflow-hidden flex flex-col mb-6 relative">
+        <div className="w-full h-[100dvh] sm:h-[900px] sm:max-h-[90vh] sm:max-w-[375px] bg-[#0a192f] rounded-[40px] shadow-xl overflow-hidden flex flex-col relative">
           {/* Author Image - Positioned above book image */}
           <div
             className={`absolute top-4 left-1/2 transform -translate-x-1/2 ${
