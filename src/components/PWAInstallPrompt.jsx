@@ -82,7 +82,6 @@ const PWAInstallPage = () => {
   };
 
 
-
   const handleMaybeLater = () => {
     setShowPrompt(false);
     navigate('/onboarding');
