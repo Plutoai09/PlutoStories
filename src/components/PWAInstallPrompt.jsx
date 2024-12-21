@@ -28,7 +28,6 @@ const PWAInstallPage = () => {
       e.preventDefault();
       setDeferredPrompt(e);
       setIsInstallReady(true);
-      window.deferredPrompt = e;  // Store it globally as well
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -36,7 +35,7 @@ const PWAInstallPage = () => {
     window.addEventListener('appinstalled', () => {
       setDeferredPrompt(null);
       setIsInstallReady(false);
-      window.deferredPrompt = null;  // Clear the global prompt
+      window.deferredPrompt = null;
       navigate('/onboarding');
     });
 
@@ -46,7 +45,7 @@ const PWAInstallPage = () => {
   }, [navigate]);
 
   const handleInstallClick = async () => {
-    if (!isInstallReady && !deferredPrompt) {
+    if (!deferredPrompt) {
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
       
       if (isIOS) {
@@ -60,27 +59,22 @@ const PWAInstallPage = () => {
     }
 
     try {
-      const promptEvent = deferredPrompt || window.deferredPrompt;
-      if (promptEvent) {
-        await promptEvent.prompt();
-        const { outcome } = await promptEvent.userChoice;
-        console.log('Install prompt outcome:', outcome);
-        
-        // Clear the prompt
-        setDeferredPrompt(null);
-        window.deferredPrompt = null;
-        setIsInstallReady(false);
-        setShowPrompt(false);
-      }
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log('Install prompt outcome:', outcome);
       
-      // Always navigate after handling the prompt
+      // Clear the prompt
+      setDeferredPrompt(null);
+      setIsInstallReady(false);
+      setShowPrompt(false);
+      
+      // Navigate after handling the prompt
       navigate('/onboarding');
     } catch (error) {
       console.error('Installation error:', error);
       navigate('/onboarding');
     }
   };
-
 
   const handleMaybeLater = () => {
     setShowPrompt(false);
