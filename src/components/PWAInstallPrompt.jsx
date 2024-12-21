@@ -5,31 +5,20 @@ const PWAInstallPage = () => {
   const [showPrompt, setShowPrompt] = useState(true);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isInstallReady, setIsInstallReady] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if app is installed
-    const checkInstallation = () => {
-      const isAppInstalled = window.matchMedia('(display-mode: standalone)').matches
-        || window.navigator.standalone 
-        || document.referrer.includes('android-app://');
+    // Check if already installed
+    const isInstalled = window.matchMedia('(display-mode: standalone)').matches
+      || window.navigator.standalone 
+      || document.referrer.includes('android-app://');
 
-      setIsInstalled(isAppInstalled);
-      
-      if (isAppInstalled) {
-        launchInstalledApp();
-      }
-    };
+    if (isInstalled) {
+      navigate('/onboarding');
+      return;
+    }
 
-    // Initial check
-    checkInstallation();
-
-    // Listen for display mode changes
-    const mediaQuery = window.matchMedia('(display-mode: standalone)');
-    mediaQuery.addListener(checkInstallation);
-
-    // Check for existing prompt
+    // Check for existing prompt first
     if (window.deferredPrompt) {
       setDeferredPrompt(window.deferredPrompt);
       setIsInstallReady(true);
@@ -39,51 +28,22 @@ const PWAInstallPage = () => {
       e.preventDefault();
       setDeferredPrompt(e);
       setIsInstallReady(true);
-      window.deferredPrompt = e;
-    };
-
-    const handleAppInstalled = () => {
-      setDeferredPrompt(null);
-      setIsInstallReady(false);
-      window.deferredPrompt = null;
-      setIsInstalled(true);
-      launchInstalledApp();
+      window.deferredPrompt = e;  // Store it globally as well
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
+    
+    window.addEventListener('appinstalled', () => {
+      setDeferredPrompt(null);
+      setIsInstallReady(false);
+      window.deferredPrompt = null;  // Clear the global prompt
+      navigate('/onboarding');
+    });
 
     return () => {
-      mediaQuery.removeListener(checkInstallation);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, [navigate]);
-
-  const launchInstalledApp = () => {
-    // Try to launch the installed PWA
-    if (window.navigator.standalone || document.referrer.includes('android-app://')) {
-      // Already in standalone mode, navigate to home
-      navigate('/onboarding');
-    } else {
-      // Try to launch the installed PWA using the manifest's start_url
-      const manifestUrl = document.querySelector('link[rel="manifest"]')?.href;
-      if (manifestUrl) {
-        fetch(manifestUrl)
-          .then(response => response.json())
-          .then(manifest => {
-            const startUrl = new URL(manifest.start_url || '/', window.location.origin);
-            window.location.href = startUrl.href;
-          })
-          .catch(() => {
-            // Fallback to opening in current window
-            navigate('/onboarding');
-          });
-      } else {
-        navigate('/onboarding');
-      }
-    }
-  };
 
   const handleInstallClick = async () => {
     if (!isInstallReady && !deferredPrompt) {
@@ -106,48 +66,30 @@ const PWAInstallPage = () => {
         const { outcome } = await promptEvent.userChoice;
         console.log('Install prompt outcome:', outcome);
         
-        if (outcome === 'accepted') {
-          // Wait for the app to be installed
-          setDeferredPrompt(null);
-          window.deferredPrompt = null;
-          setIsInstallReady(false);
-          setShowPrompt(false);
-          // The appinstalled event will handle launching the app
-        } else {
-          // If user declined, navigate to onboarding
-          navigate('/onboarding');
-        }
+        // Clear the prompt
+        setDeferredPrompt(null);
+        window.deferredPrompt = null;
+        setIsInstallReady(false);
+        setShowPrompt(false);
       }
+      
+      // Always navigate after handling the prompt
+      navigate('/onboarding');
     } catch (error) {
       console.error('Installation error:', error);
       navigate('/onboarding');
     }
   };
 
+
+
   const handleMaybeLater = () => {
     setShowPrompt(false);
     navigate('/onboarding');
   };
 
-  // If app is already installed, try to launch it immediately
-  useEffect(() => {
-    if (isInstalled) {
-      launchInstalledApp();
-    }
-  }, [isInstalled]);
-
+  // Check if it's iOS
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-
-  // If app is installed, show loading or redirect immediately
-  if (isInstalled) {
-    return (
-      <div className="min-h-screen bg-[#0a192f] flex items-center justify-center p-4">
-        <div className="text-white text-center">
-          <p>Opening Pluto Sleep...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#0a192f] flex items-center justify-center p-4">
