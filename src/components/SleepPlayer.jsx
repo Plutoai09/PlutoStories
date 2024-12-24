@@ -945,10 +945,10 @@ const [duration, setDuration] = useState(0);
             <div className="flex justify-between items-center">
               <h2 className="text-lg font-semibold text-white">Calm by Pluto</h2>
               <div 
-                onClick={() => window.location.href = "https://wa.link/tzl6b6"}
+                onClick={() => window.location.href = "https://pluto-stories.vercel.app/login"}
                 className="cursor-pointer px-2 py-1 rounded-full flex items-center justify-center bg-[#1d3557]"
               >
-                <span className="text-[10px] text-white">Report bug</span>
+                <span className="text-[10px] text-white">Support</span>
               </div>
             </div>
             <p className="text-sm text-gray-300">Sleep Stories</p>
