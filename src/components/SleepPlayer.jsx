@@ -830,6 +830,57 @@ const [duration, setDuration] = useState(0);
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
+
+
+  const handleSupportClick = async (e) => {
+    e.preventDefault();
+  
+    // Define your PWA details
+    const PWA_ID = 'com.pluto.audiobooks';
+    const PWA_URL = 'https://pluto-stories.vercel.app';
+  
+    try {
+      // Check if the PWA is installed
+      if ('getInstalledRelatedApps' in navigator) {
+        const relatedApps = await navigator.getInstalledRelatedApps();
+        const plutoPWA = relatedApps.find(app => 
+          app.id === PWA_ID || 
+          app.url.startsWith(PWA_URL)
+        );
+  
+        if (plutoPWA) {
+          // PWA is installed, try to launch it
+          console.log('Found installed Pluto PWA');
+          
+          // For modern browsers that support launching PWAs
+          if ('launchQueue' in window) {
+            window.launchQueue.setConsumer(launchParams => {
+              if (launchParams.targetURL) {
+                window.location.href = '/login';
+              }
+            });
+          } else {
+            // Fallback to basic URL handling
+            window.location.href = '/login';
+          }
+          return;
+        }
+      }
+      
+      // If PWA is not installed or can't be detected, fall back to web URL
+      window.location.href = `${PWA_URL}/login`;
+      
+    } catch (error) {
+      console.error('Error launching PWA:', error);
+      // Fallback to web URL
+      window.location.href = `${PWA_URL}/login`;
+    }
+  };
+  
+
+
+
+
   const handleQuestionSubmit = async (e) => {
     e.preventDefault();
     if (audioElement) {
@@ -945,7 +996,7 @@ const [duration, setDuration] = useState(0);
             <div className="flex justify-between items-center">
               <h2 className="text-lg font-semibold text-white">Calm by Pluto</h2>
               <div 
-                onClick={() => window.location.href = "https://pluto-stories.vercel.app/login"}
+                onClick={handleSupportClick}
                 className="cursor-pointer px-2 py-1 rounded-full flex items-center justify-center bg-[#1d3557]"
               >
                 <span className="text-[10px] text-white">Support</span>

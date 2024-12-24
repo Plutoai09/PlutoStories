@@ -22,5 +22,11 @@
   "display": "standalone",
   "theme_color": "#0a192f",
   "background_color": "#060f1c",
-  "orientation": "portrait"
+  "orientation": "portrait",
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://pluto-stories.vercel.app/manifest.json",
+      "id": "com.pluto.audiobooks"
+    }]
 }
