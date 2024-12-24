@@ -6,10 +6,7 @@ import App from './App.jsx'
 window.deferredPrompt = null;
 
 // Listen for beforeinstallprompt before anything else
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  window.deferredPrompt = e;
-});
+
 
 // Register service worker after page load
 if ('serviceWorker' in navigator) {
