@@ -10,30 +10,37 @@ const PWAInstallPage = () => {
   useEffect(() => {
     // Check if already installed
     const isInstalled = window.matchMedia('(display-mode: standalone)').matches
-      || window.navigator.standalone;
-    
+      || window.navigator.standalone 
+      || document.referrer.includes('android-app://');
+
     if (isInstalled) {
-      console.log('Already installed, navigating to app');
-      navigate('/app');
+      navigate('/onboarding');
       return;
     }
 
+    // Check for existing prompt first
+    if (window.deferredPrompt) {
+      setDeferredPrompt(window.deferredPrompt);
+      setIsInstallReady(true);
+    }
+
     const handleBeforeInstallPrompt = (e) => {
-      console.log('Captured beforeinstallprompt');
+      // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
+      // Stash the event so it can be triggered later
+      window.deferredPrompt = e;
       setDeferredPrompt(e);
+      setIsInstallReady(true);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    // Log environment info
-    console.log('PWA Environment:', {
-      protocol: window.location.protocol,
-      isHttps: window.location.protocol === 'https:',
-      hasServiceWorker: 'serviceWorker' in navigator,
-      isStandalone: window.matchMedia('(display-mode: standalone)').matches,
-      userAgent: navigator.userAgent,
-      pathname: window.location.pathname
+    
+    window.addEventListener('appinstalled', () => {
+      // Clear the prompt
+      window.deferredPrompt = null;
+      setDeferredPrompt(null);
+      setIsInstallReady(false);
+      navigate('/onboarding');
     });
 
     return () => {
@@ -41,44 +48,38 @@ const PWAInstallPage = () => {
     };
   }, [navigate]);
 
-
-
   const handleInstallClick = async () => {
-    console.log('Install clicked, deferredPrompt:', deferredPrompt);
-    
-    if (!deferredPrompt) {
+    // Get the deferred prompt from either state or window
+    const promptEvent = deferredPrompt || window.deferredPrompt;
+
+    if (!promptEvent) {
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
       
       if (isIOS) {
         alert('To install: tap the share button below and select "Add to Home Screen"');
-      } else {
-        console.log('No installation prompt available');
-        // Check if it's already installed
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-          navigate('/app');
-          return;
-        }
       }
       
-      navigate('/onboarding');
+      setTimeout(() => {
+        navigate('/onboarding');
+      }, 2000);
       return;
     }
 
     try {
-      console.log('Triggering prompt...');
-      await deferredPrompt.prompt();
+      // Show the install prompt
+      await promptEvent.prompt();
+      // Wait for the user to respond to the prompt
+      const { outcome } = await promptEvent.userChoice;
+      console.log('Install prompt outcome:', outcome);
       
-      const choiceResult = await deferredPrompt.userChoice;
-      console.log('User choice:', choiceResult);
+      // Clear the prompt
+      window.deferredPrompt = null;
+      setDeferredPrompt(null);
+      setIsInstallReady(false);
+      setShowPrompt(false);
       
-      if (choiceResult.outcome === 'accepted') {
-        console.log('User accepted installation');
-        setDeferredPrompt(null);
-        navigate('/app');
-      } else {
-        console.log('User declined installation');
-        navigate('/onboarding');
-      }
+      // Navigate after handling the prompt
+      navigate('/app');
     } catch (error) {
       console.error('Installation error:', error);
       navigate('/onboarding');
