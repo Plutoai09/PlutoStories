@@ -74,13 +74,12 @@ const PWAInstallPage = () => {
       
       // Clear the prompt
       window.deferredPrompt = null;
-      navigate('/app');
       setDeferredPrompt(null);
       setIsInstallReady(false);
       setShowPrompt(false);
       
       // Navigate after handling the prompt
-  
+      navigate('/app');
     } catch (error) {
       console.error('Installation error:', error);
       navigate('/onboarding');
